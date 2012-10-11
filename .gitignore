@@ -1,13 +1,14 @@
 *.class
-*.log
+*.iml
+*.ipr
+*.iws
 
-# sbt specific
-dist/*
-target/
-lib_managed/
-src_managed/
-project/boot/
-project/plugins/project/
+# Package Files #
+#*.jar
+*.war
+*.ear
 
-# Scala-IDE specific
-.scala_dependencies
+.idea
+out
+dist
+lib
