@@ -17,6 +17,7 @@ class ImagePanel extends Panel {
     private val borderThickness = 8
 
     private var image: BufferedImage = null
+    private var fftChannels: (Array[Array[Double]], Array[Array[Double]], Array[Array[Double]]) = null
 
     private var isSelected = false
 
@@ -34,6 +35,12 @@ class ImagePanel extends Panel {
     def getImage: BufferedImage = image
 
     def isImagePanelSelected = isSelected
+
+    def fftImageChannels = fftChannels
+
+    def fftImageChannels_=(channel1: Array[Array[Double]], channel2: Array[Array[Double]], channel3: Array[Array[Double]]) {
+        fftChannels = (channel1, channel2, channel3)
+    }
 
     override protected def paintComponent(graphics: _root_.scala.swing.Graphics2D) {
         super.paintComponent(graphics)
