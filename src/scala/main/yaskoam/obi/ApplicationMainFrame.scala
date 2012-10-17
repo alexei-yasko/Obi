@@ -1,6 +1,7 @@
 package yaskoam.obi
 
 import filter.FilterControlPanel
+import furier.FourierControlPanel
 import giis.labs.graphics.custom.ToolBar
 import image.{ImageContainerPanel, ImagePanel}
 import normalization.NormalizationControlPanel
@@ -22,9 +23,12 @@ class ApplicationMainFrame extends MainFrame {
 
     private val normalizationControlPanel = new NormalizationControlPanel(imageContainerPanel)
     private val filterControlPanel = new FilterControlPanel(imageContainerPanel)
+    private val fourierControlPanel = new FourierControlPanel(imageContainerPanel)
 
     private val toolBar = new ToolBar
     //toolBar.add(filterControlPanel)
+    //toolBar.add(normalizationControlPanel)
+    toolBar.add(fourierControlPanel)
     toolBar.add(filterControlPanel)
 
     title = "Filters Application"

@@ -1,7 +1,7 @@
 package yaskoam.obi.normalization
 
 import swing.{Button, FlowPanel}
-import yaskoam.obi.image.ImageContainerPanel
+import yaskoam.obi.image.{ImageUtil, ImageContainerPanel}
 import java.awt.image.BufferedImage
 import java.awt.Color
 import swing.event.ButtonClicked
@@ -35,17 +35,17 @@ class NormalizationControlPanel(imageContainerPanel: ImageContainerPanel) extend
     }
 
     def normalizeImage(image: BufferedImage) {
-        val separatedChannels = getSeparatedChannels(image)
+        val separatedChannels = ImageUtil.getSeparatedChannels(image)
 
         normalizeChannel(separatedChannels._1)
         normalizeChannel(separatedChannels._2)
         normalizeChannel(separatedChannels._3)
 
-        setChannelsToImage(image, separatedChannels)
+        ImageUtil.setChannelsToImage(image, separatedChannels)
     }
 
     private def normalizeChannel(channel: Array[Array[Int]]) {
-        val histogram = buildHistogram(channel)
+        val histogram = ImageUtil.buildHistogram(channel)
 
         val min = calculateMinLevel(histogram)
         val max = calculateMaxLevel(histogram)
@@ -61,46 +61,6 @@ class NormalizationControlPanel(imageContainerPanel: ImageContainerPanel) extend
                 }
             }
         }
-    }
-
-    private def buildHistogram(channel: Array[Array[Int]]): Array[Int] = {
-        val histogram = new Array[Int](256)
-
-        for (x <- 0 until channel.size) {
-            for (y <- 0 until channel(x).size) {
-                histogram(channel(x)(y)) = histogram(channel(x)(y)) + 1
-            }
-        }
-
-        histogram
-    }
-
-    private def setChannelsToImage(
-        image: BufferedImage, channels: (Array[Array[Int]], Array[Array[Int]], Array[Array[Int]])) {
-
-        for (x <- 0 until image.getWidth) {
-            for (y <- 0 until image.getHeight) {
-                val color = new Color(channels._1(x)(y), channels._2(x)(y), channels._3(x)(y))
-                image.setRGB(x, y, color.getRGB)
-            }
-        }
-    }
-
-    private def getSeparatedChannels(image: BufferedImage): (Array[Array[Int]], Array[Array[Int]], Array[Array[Int]]) = {
-        val redChannel = Array.ofDim[Int](image.getWidth, image.getHeight)
-        val greenChannel = Array.ofDim[Int](image.getWidth, image.getHeight)
-        val blueChannel = Array.ofDim[Int](image.getWidth, image.getHeight)
-
-        for (x <- 0 until image.getWidth) {
-            for (y <- 0 until image.getHeight) {
-                val color = new Color(image.getRGB(x, y))
-                redChannel(x)(y) = color.getRed
-                greenChannel(x)(y) = color.getGreen
-                blueChannel(x)(y) = color.getBlue
-            }
-        }
-
-        (redChannel, greenChannel, blueChannel)
     }
 
     private def calculateMinLevel(histogram: Array[Int]): Int = {
