@@ -190,8 +190,6 @@ class FourierControlPanel(imageContainerPanel: ImageContainerPanel) extends Flow
     //        }
     //    }
     //
-        private def log2(x: Double) = math.log(x) / math.log(2)
-    //
     //    private def visualizeFftNew(fftMatrix: Array[Array[Double]], width: Int, height: Int): Array[Array[Int]] = {
     //        val resultChannel = Array.ofDim[Int](height, width)
     //
