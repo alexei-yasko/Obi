@@ -54,9 +54,9 @@ class FourierControlPanel(imageContainerPanel: ImageContainerPanel) extends Flow
         imagePanel.fftImageChannels_=(fftChannel1, fftChannel2, fftChannel3)
 
         ImageUtils.setChannelsToImage(image, (
-            visualizeFft(fftChannel1, width, height),
-            visualizeFft(fftChannel2, width, height),
-            visualizeFft(fftChannel3, width, height))
+            visualizeFftNew(fftChannel1, width, height),
+            visualizeFftNew(fftChannel2, width, height),
+            visualizeFftNew(fftChannel3, width, height))
         )
     }
 
@@ -88,14 +88,15 @@ class FourierControlPanel(imageContainerPanel: ImageContainerPanel) extends Flow
 
         transformationArray = new Fft().fft2DDouble(transformationArray, width, height)
 
-        val resultArray = Array.ofDim[Double](height, width)
-        for (i <- 0 until height) {
-            for (j <- 0 until width) {
-                resultArray(i)(j) = transformationArray(i)(j * 2) + transformationArray(i)(j * 2 + 1)
-            }
-        }
-
-        resultArray
+        transformationArray
+        //        val resultArray = Array.ofDim[Double](height, width)
+        //        for (i <- 0 until height) {
+        //            for (j <- 0 until width) {
+        //                resultArray(i)(j) = transformationArray(i)(j * 2) + transformationArray(i)(j * 2 + 1)
+        //            }
+        //        }
+        //
+        //        resultArray
     }
 
     private def inverseTransformImage(imagePanel: ImagePanel) {
@@ -177,8 +178,89 @@ class FourierControlPanel(imageContainerPanel: ImageContainerPanel) extends Flow
                 currentAmplitude = fftMatrix(i)(j).abs
                 // Log scale
                 currentAmplitude = (255 * math.log(1 + currentAmplitude) / maxAmplitude)
-                if (currentAmplitude > 255) currentAmplitude = 255
+                if (currentAmplitude > 255) {
+                    currentAmplitude = 255
+                }
                 resultChannel(i)(j) = currentAmplitude.toInt
+            }
+        }
+
+        resultChannel
+    }
+
+    private def reorder(inp: Array[Array[Double]], width: Int, height: Int) {
+        val tmp = Array.ofDim[Double](height, width)
+        val w = (width / 2).toInt
+        val h = (height / 2).toInt
+
+        for (i <- 0 until h) {
+            for (j <- 0 until w) {
+                tmp(i)(j) = inp(i)(j)
+            }
+        }
+        for (i <- 0 until h) {
+            for (j <- 0 until w) {
+                inp(i)(j) = inp(i + h)(j + w)
+            }
+        }
+
+        for (i <- 0 until h) {
+            for (j <- 0 until w) {
+                inp(i + h)(j + w) = tmp(i)(j)
+            }
+        }
+
+        for (i <- 0 until h) {
+            for (j <- 0 until w) {
+                tmp(i)(j) = inp(i + h)(j)
+            }
+        }
+        for (i <- 0 until h) {
+            for (j <- 0 until w) {
+                inp(i + h)(j) = inp(i)(j + w)
+            }
+        }
+
+        for (i <- 0 until h) {
+            for (j <- 0 until w) {
+                inp(i)(j + w) = tmp(i)(j)
+            }
+        }
+
+    }
+
+    private def visualizeFftNew(channel: Array[Array[Double]], width: Int, height: Int): Array[Array[Int]] = {
+        val resultChannel = Array.ofDim[Int](height, width)
+
+        var min = Double.MaxValue
+        var max = Double.MinValue
+
+        reorder(channel, width * 2, height)
+
+        for (i <- 0 until height) {
+            for (j <- 0 until width) {
+                val module = math.hypot(channel(i)(2 * j), channel(i)(2 * j + 1))
+                val phase = math.atan2(channel(i)(2 * j), channel(i)(2 * j + 1))
+                val real: Double = channel(i)(2 * j)
+
+                if (max < module) {
+                    max = module
+                }
+                if (min > module) {
+                    min = module
+                }
+
+                channel(i)(2 * j) = module
+            }
+        }
+
+        for (i <- 0 until height) {
+            for (j <- 0 until width) {
+                val test: Double = (channel(i)(2 * j) - min) / (max - min)
+                resultChannel(i)(j) = (255 * test).toInt
+//                if (resultChannel(i)(j) > 255) {
+//                    resultChannel(i)(j) = 255
+//                }
             }
         }
 
