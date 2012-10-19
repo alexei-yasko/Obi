@@ -47,9 +47,9 @@ class FourierControlPanel(imageContainerPanel: ImageContainerPanel) extends Flow
 
         val channels = ImageUtils.getSeparatedChannels(image)
 
-        val fftChannel1 = forwardTransform(channels._1, width, height)
-        val fftChannel2 = forwardTransform(channels._2, width, height)
-        val fftChannel3 = forwardTransform(channels._3, width, height)
+        val fftChannel1 = forwardTransform(convertChannelToChannelWithPowerOfTwoWidth(channels._1, width, height))
+        val fftChannel2 = forwardTransform(convertChannelToChannelWithPowerOfTwoWidth(channels._2, width, height))
+        val fftChannel3 = forwardTransform(convertChannelToChannelWithPowerOfTwoWidth(channels._3, width, height))
 
         imagePanel.fftImageChannels_=(fftChannel1, fftChannel2, fftChannel3)
 
@@ -60,8 +60,25 @@ class FourierControlPanel(imageContainerPanel: ImageContainerPanel) extends Flow
         )
     }
 
-    private def forwardTransform(input: Array[Array[Int]], width: Int, height: Int): Array[Array[Double]] = {
-        val transformationArray = Array.ofDim[Double](height, 2 * width)
+    private def convertChannelToChannelWithPowerOfTwoWidth(
+        channel: Array[Array[Int]], width: Int, height: Int): Array[Array[Int]] = {
+
+        val newWidth = math.pow(2, log2(width).toInt + 1).toInt
+        val newHeight = math.pow(2, log2(height).toInt + 1).toInt
+
+        val newChannel = Array.ofDim[Int](newHeight, newWidth)
+
+        for (i <- 0 until height) {
+            System.arraycopy(channel(i), 0, newChannel(i), 0, width)
+        }
+
+        newChannel
+    }
+
+    private def forwardTransform(input: Array[Array[Int]]): Array[Array[Double]] = {
+        val height = input.length
+        val width = input(0).length
+        var transformationArray = Array.ofDim[Double](input.length, width)
 
         for (i <- 0 until height) {
             for (j <- 0 until width) {
@@ -69,8 +86,7 @@ class FourierControlPanel(imageContainerPanel: ImageContainerPanel) extends Flow
             }
         }
 
-        val fft = new DoubleFFT_2D(height, width)
-        fft.realForwardFull(transformationArray)
+        transformationArray = new Fft().fft2DDouble(transformationArray, width, height)
 
         val resultArray = Array.ofDim[Double](height, width)
         for (i <- 0 until height) {
@@ -84,10 +100,10 @@ class FourierControlPanel(imageContainerPanel: ImageContainerPanel) extends Flow
 
     private def inverseTransformImage(imagePanel: ImagePanel) {
         val image = imagePanel.getImage
-        val width = image.getWidth
-        val height = image.getHeight
-
         val fftChannels = imagePanel.fftImageChannels
+
+        val width = fftChannels._1(0).length
+        val height = fftChannels._1.length
 
         if (fftChannels != null) {
             val imageChannel1 = inverseTransform(fftChannels._1, width, height)
@@ -169,6 +185,7 @@ class FourierControlPanel(imageContainerPanel: ImageContainerPanel) extends Flow
         resultChannel
     }
 
+    private def log2(x: Double) = math.log(x) / math.log(2)
 
     //
     //    private def prepareToFft(channel: Array[Array[Int]], width: Int, height: Int): Array[Double] = {

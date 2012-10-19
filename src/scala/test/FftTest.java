@@ -44,7 +44,7 @@ public class FftTest {
             {146, 253, 100, 19},
             {111, 243, 127, 222},
             {162, 117, 54, 1},
-            {215, 27, 19, 189}
+            {215, 27, 19, 189},
         };
 
         double[][] myResultMatrix = new Fft().fft2DDouble(matrix, matrix[0].length, matrix.length);
