@@ -27,7 +27,7 @@ class ApplicationMainFrame extends MainFrame {
 
     private val toolBar = new ToolBar
     //toolBar.add(filterControlPanel)
-    toolBar.add(normalizationControlPanel)
+    //toolBar.add(normalizationControlPanel)
     toolBar.add(fourierControlPanel)
 
     title = "Filters Application"
