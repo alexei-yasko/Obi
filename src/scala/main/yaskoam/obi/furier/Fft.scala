@@ -8,27 +8,26 @@ import org.apache.commons.math3.complex.Complex
 class Fft {
 
     def fft2DDouble(matrix: Array[Array[Double]], width: Int, height: Int): Array[Array[Double]] = {
-        val newMatrix = Array.ofDim[Double](height, width * 2)
-
-        for (j <- 0 until width) {
-            val column = Array.ofDim[Double](height)
-
-            for (i <- 0 until height) {
-                column(i) = matrix(i)(j)
-            }
-
-            val columnFft = fft1DDouble(column, height)
-
-            for (i <- 0 until height) {
-                newMatrix(i)(j) = columnFft(i * 2)
-            }
-        }
+        val complexMatrix = convertDoubleMatrixToComplexMatrix(matrix, width, height)
 
         for (i <- 0 until height) {
-            newMatrix(i) = fft1DDouble(newMatrix(i), width)
+            fft1DComplex(complexMatrix(i), width)
+        }
+        for (j <- 0 until width) {
+            val column = Array.ofDim[Complex](height)
+
+            for (i <- 0 until height) {
+                column(i) = complexMatrix(i)(j)
+            }
+
+            fft1DComplex(column, height)
+
+            for (i <- 0 until height) {
+                complexMatrix(i)(j) = column(i)
+            }
         }
 
-        newMatrix
+        convertComplexMatrixToDoublePresentation(complexMatrix, width, height)
     }
 
     def fft1DDouble(array: Array[Double], length: Int): Array[Double] = {
@@ -65,29 +64,30 @@ class Fft {
         }
     }
 
-    //    private def convertDoubleMatrixToComplexMatrix(
-    //        doubleMatrix: Array[Array[Double]], width: Int, height: Int): Array[Array[Complex]] = {
-    //
-    //        val complexMatrix = Array.ofDim[Complex](height, width)
-    //
-    //        for (i <- 0 until height) {
-    //            complexMatrix(i) = convertDoubleArrayToComplexArray(doubleMatrix(i))
-    //        }
-    //
-    //        complexMatrix
-    //    }
-    //
-    //    private def convertComplexMatrixToDoublePresentation(
-    //        complexMatrix: Array[Array[Complex]], width: Int, height: Int): Array[Array[Double]] = {
-    //
-    //        val doubleMatrix = Array.ofDim[Double](height, width * 2)
-    //
-    //        for (i <- 0 until height) {
-    //            doubleMatrix(i) = convertComplexArrayToDoublePresentation(complexMatrix(i))
-    //        }
-    //
-    //        doubleMatrix
-    //    }
+    private def convertDoubleMatrixToComplexMatrix(
+        doubleMatrix: Array[Array[Double]], width: Int, height: Int): Array[Array[Complex]] = {
+
+        val complexMatrix = Array.ofDim[Complex](height, width)
+
+        for (i <- 0 until height) {
+            complexMatrix(i) = convertDoubleArrayToComplexArray(doubleMatrix(i), width)
+        }
+
+        complexMatrix
+    }
+
+
+    private def convertComplexMatrixToDoublePresentation(
+        complexMatrix: Array[Array[Complex]], width: Int, height: Int): Array[Array[Double]] = {
+
+        val doubleMatrix = Array.ofDim[Double](height, width * 2)
+
+        for (i <- 0 until height) {
+            doubleMatrix(i) = convertComplexArrayToDoublePresentation(complexMatrix(i), width)
+        }
+
+        doubleMatrix
+    }
 
     private def convertDoubleArrayToComplexArray(doubleArray: Array[Double], length: Int): Array[Complex] = {
         val complexArray = Array.ofDim[Complex](length)
@@ -109,7 +109,4 @@ class Fft {
 
         doubleArray
     }
-
-    private def log2(x: Double) = math.log(x) / math.log(2)
-
 }
