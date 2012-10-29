@@ -95,7 +95,7 @@ class ImagePanel extends Panel {
         repaint()
     }
 
-    //private def imagePositionX(imageWidth: Int): Int = bounds.x + size.width / 2 - imageWidth / 2
+    //private def imagePositionX(imageWidth: Int): Int = bounds.x + size.imageWidth / 2 - imageWidth / 2
 
-    //private def imagePositionY(imageHeight: Int): Int = bounds.y + size.height / 2 - imageHeight / 2
+    //private def imagePositionY(imageHeight: Int): Int = bounds.y + size.imageHeight / 2 - imageHeight / 2
 }
