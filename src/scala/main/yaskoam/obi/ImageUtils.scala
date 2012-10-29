@@ -3,12 +3,17 @@ package yaskoam.obi
 import java.awt.image.BufferedImage
 import java.io.{IOException, File}
 import javax.imageio.ImageIO
-import java.awt.{RenderingHints, Color}
+import java.awt.Color
 
 /**
  * @author Q-YAA
  */
 object ImageUtils {
+
+    val ANAGLYPH_RAD_CYAN_COLOR = 1
+    val ANAGLYPH_RAD_GREEN_COLOR = 2
+    val ANAGLYPH_RAD_BLUE_COLOR = 3
+    val ANAGLYPH_YELLOW_BLUE_COLOR = 4
 
     def loadBufferedImage(path: String): BufferedImage = {
         try {
@@ -76,39 +81,53 @@ object ImageUtils {
         }
     }
 
+    def getAnaglyphImage(left: BufferedImage, right: BufferedImage, anaglyphType: Int): BufferedImage = {
+        val width = math.min(left.getWidth, right.getWidth)
+        val height = math.min(left.getHeight, right.getHeight)
 
-    def buildKernelImageForMotionBlur(radius: Double, angle: Double): BufferedImage = {
-        // motionLength plus 2*3 pixels to ensure that generated kernel will be fitted inside the image
-        val motionLength = radius * 2
-        val motionAngle = angle
+        val anaglyphImage = new BufferedImage(width, height, left.getType)
 
-        var size = (motionLength + 6).toInt
-        size = size + (size % 2)
+        for (x <- 0 until width) {
+            for (y <- 0 until height) {
+                val pxL = new RgbaConverter(left.getRGB(x, y))
+                val pxR = new RgbaConverter(right.getRGB(x, y))
+                //anaglyphImage.setRGB(w, h, multyplayColor(pxL, pxR, math.abs(anaglyphType)))
+            }
+        }
 
-        val kernelImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB)
-
-        val graphics = kernelImage.createGraphics()
-
-        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-        graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
-
-        graphics.setPaint(Color.BLACK)
-        graphics.fillRect(0, 0, kernelImage.getWidth, kernelImage.getHeight)
-
-        graphics.setColor(Color.WHITE)
-
-        val center = 0.5 + size / 2d
-        val motionAngleRad = math.Pi * motionAngle / 180
-
-        graphics.drawLine(
-            (center - motionLength * math.cos(motionAngleRad) / 2).toInt,
-            (center - motionLength * math.sin(motionAngleRad) / 2).toInt,
-            (center + motionLength * math.cos(motionAngleRad) / 2).toInt,
-            (center + motionLength * math.sin(motionAngleRad) / 2).toInt
-        )
-
-        graphics.dispose()
-
-        kernelImage
+        anaglyphImage
     }
+
+    //    private def multyplayColor(left: RgbaConverter, right: BufferedImage, anaglyphType: Int): Int = {
+    //
+    //    		val leftMatrix  = Array(0d, 0d, 0d); // R, G, B
+    //    		val rightMatrix = Array(0d, 0d, 0d); // R, G, B
+    //
+    //        anaglyphType match {
+    //            case
+    //        }
+    //    		if(type == ANAGLYPH_RAD_CYAN){
+    //    			leftMatrix  = new double[] {1,0,0}; // R, G, B
+    //    			rightMatrix = new double[] {0,1,1}; // R, G, B
+    //    		}
+    //
+    //    		if(type==ANAGLYPH_RAD_GREEN){
+    //    			leftMatrix  = new double[] {1,0,0}; // R, G, B
+    //    			rightMatrix = new double[] {0,1,0}; // R, G, B
+    //    		}
+    //
+    //    		if(type==ANAGLYPH_RAD_BLUE){
+    //    			leftMatrix  = new double[] {1,0,0}; // R, G, B
+    //    			rightMatrix = new double[] {0,0,1}; // R, G, B
+    //    		}
+    //
+    //    		if(type==ANAGLYPH_YELLOW_BLUE){
+    //    			leftMatrix  = new double[] {1,1,0}; // R, G, B
+    //    			rightMatrix = new double[] {0,0,1}; // R, G, B
+    //    		}
+    //
+    //    		return ((((int)Math.round(((leftMatrix[0] * l.getRed()))   +  ((rightMatrix[0] * r.getRed()))))  & 0xFF) << 16) |
+    //    		((((int)Math.round(((leftMatrix[1] * l.getGreen())) +  ((rightMatrix[1] * r.getGreen()))))  & 0xFF) << 8) |
+    //    		((((int)Math.round(((leftMatrix[2] * l.getBlue()))  +  ((rightMatrix[2] * r.getBlue()))))  & 0xFF) << 0);
+    //    	}
 }
