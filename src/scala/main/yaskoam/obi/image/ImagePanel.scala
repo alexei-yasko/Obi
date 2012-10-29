@@ -32,6 +32,10 @@ class ImagePanel extends Panel {
         executeAndRepaint(() => this.image = image)
     }
 
+    def setImage(image: BufferedImage) {
+        this.image = image
+    }
+
     def getImage: BufferedImage = image
 
     def isImagePanelSelected = isSelected
@@ -94,8 +98,4 @@ class ImagePanel extends Panel {
         function()
         repaint()
     }
-
-    //private def imagePositionX(imageWidth: Int): Int = bounds.x + size.imageWidth / 2 - imageWidth / 2
-
-    //private def imagePositionY(imageHeight: Int): Int = bounds.y + size.imageHeight / 2 - imageHeight / 2
 }
