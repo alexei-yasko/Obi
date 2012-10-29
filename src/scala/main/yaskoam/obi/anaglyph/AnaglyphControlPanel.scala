@@ -26,7 +26,7 @@ class AnaglyphControlPanel(imageContainerPanel: ImageContainerPanel) extends Flo
             val rightImage = imageContainerPanel.getSelectedImagePanels.head.getImage
 
             val anaglyphImage =
-                ImageUtils.getAnaglyphImage(leftImage, rightImage, ImageUtils.ANAGLYPH_RAD_GREEN_COLOR)
+                ImageUtils.getAnaglyphImage(leftImage, rightImage, ImageUtils.ANAGLYPH_RED_CYAN_COLOR)
 
             val resultImageDialog = new ImageDialog(anaglyphImage, this)
             resultImageDialog.open()

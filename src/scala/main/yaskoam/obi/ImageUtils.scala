@@ -10,9 +10,9 @@ import java.awt.Color
  */
 object ImageUtils {
 
-    val ANAGLYPH_RAD_CYAN_COLOR = 1
-    val ANAGLYPH_RAD_GREEN_COLOR = 2
-    val ANAGLYPH_RAD_BLUE_COLOR = 3
+    val ANAGLYPH_RED_CYAN_COLOR = 1
+    val ANAGLYPH_RED_GREEN_COLOR = 2
+    val ANAGLYPH_RED_BLUE_COLOR = 3
     val ANAGLYPH_YELLOW_BLUE_COLOR = 4
 
     def loadBufferedImage(path: String): BufferedImage = {
@@ -104,18 +104,18 @@ object ImageUtils {
         val rightMatrix = Array(0d, 0d, 0d)
 
         anaglyphType match {
-            case ANAGLYPH_RAD_CYAN_COLOR => {
+            case ANAGLYPH_RED_CYAN_COLOR => {
                 leftMatrix(0) = 1d
                 rightMatrix(1) = 1d
                 rightMatrix(2) = 1d
             }
 
-            case ANAGLYPH_RAD_GREEN_COLOR => {
+            case ANAGLYPH_RED_GREEN_COLOR => {
                 leftMatrix(0) = 1d
                 rightMatrix(1) = 1d
             }
 
-            case ANAGLYPH_RAD_BLUE_COLOR => {
+            case ANAGLYPH_RED_BLUE_COLOR => {
                 leftMatrix(0) = 1d
                 rightMatrix(2) = 1d
             }
