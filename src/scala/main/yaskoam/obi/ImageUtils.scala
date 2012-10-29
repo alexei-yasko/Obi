@@ -3,12 +3,17 @@ package yaskoam.obi
 import java.awt.image.BufferedImage
 import java.io.{IOException, File}
 import javax.imageio.ImageIO
-import java.awt.{RenderingHints, Color}
+import java.awt.Color
 
 /**
  * @author Q-YAA
  */
 object ImageUtils {
+
+    val ANAGLYPH_RAD_CYAN_COLOR = 1
+    val ANAGLYPH_RAD_GREEN_COLOR = 2
+    val ANAGLYPH_RAD_BLUE_COLOR = 3
+    val ANAGLYPH_YELLOW_BLUE_COLOR = 4
 
     def loadBufferedImage(path: String): BufferedImage = {
         try {
@@ -66,7 +71,7 @@ object ImageUtils {
     }
 
     def setChannelsToImage(
-        image: BufferedImage, channels: (Array[Array[Int]], Array[Array[Int]], Array[Array[Int]])) {
+            image: BufferedImage, channels: (Array[Array[Int]], Array[Array[Int]], Array[Array[Int]])) {
 
         for (i <- 0 until image.getHeight) {
             for (j <- 0 until image.getWidth) {
@@ -76,39 +81,56 @@ object ImageUtils {
         }
     }
 
+    def getAnaglyphImage(left: BufferedImage, right: BufferedImage, anaglyphType: Int): BufferedImage = {
+        val width = math.min(left.getWidth, right.getWidth)
+        val height = math.min(left.getHeight, right.getHeight)
 
-    def buildKernelImageForMotionBlur(radius: Double, angle: Double): BufferedImage = {
-        // motionLength plus 2*3 pixels to ensure that generated kernel will be fitted inside the image
-        val motionLength = radius * 2
-        val motionAngle = angle
+        val anaglyphImage = new BufferedImage(width, height, left.getType)
 
-        var size = (motionLength + 6).toInt
-        size = size + (size % 2)
+        for (x <- 0 until width) {
+            for (y <- 0 until height) {
+                val pxL = new RgbConverter(left.getRGB(x, y))
+                val pxR = new RgbConverter(right.getRGB(x, y))
+                anaglyphImage.setRGB(x, y, multyplayColor(pxL, pxR, math.abs(anaglyphType)))
+            }
+        }
 
-        val kernelImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB)
+        anaglyphImage
+    }
 
-        val graphics = kernelImage.createGraphics()
+    private def multyplayColor(left: RgbConverter, right: RgbConverter, anaglyphType: Int): Int = {
 
-        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-        graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
+        val leftMatrix = Array(0d, 0d, 0d)
+        val rightMatrix = Array(0d, 0d, 0d)
 
-        graphics.setPaint(Color.BLACK)
-        graphics.fillRect(0, 0, kernelImage.getWidth, kernelImage.getHeight)
+        anaglyphType match {
+            case ANAGLYPH_RAD_CYAN_COLOR => {
+                leftMatrix(0) = 1d
+                rightMatrix(1) = 1d
+                rightMatrix(2) = 1d
+            }
 
-        graphics.setColor(Color.WHITE)
+            case ANAGLYPH_RAD_GREEN_COLOR => {
+                leftMatrix(0) = 1d
+                rightMatrix(1) = 1d
+            }
 
-        val center = 0.5 + size / 2d
-        val motionAngleRad = math.Pi * motionAngle / 180
+            case ANAGLYPH_RAD_BLUE_COLOR => {
+                leftMatrix(0) = 1d
+                rightMatrix(2) = 1d
+            }
 
-        graphics.drawLine(
-            (center - motionLength * math.cos(motionAngleRad) / 2).toInt,
-            (center - motionLength * math.sin(motionAngleRad) / 2).toInt,
-            (center + motionLength * math.cos(motionAngleRad) / 2).toInt,
-            (center + motionLength * math.sin(motionAngleRad) / 2).toInt
-        )
+            case ANAGLYPH_YELLOW_BLUE_COLOR => {
+                leftMatrix(0) = 1d
+                leftMatrix(1) = 1d
+                rightMatrix(2) = 1d
+            }
+        }
 
-        graphics.dispose()
+        val red = ((math.round(leftMatrix(0) * left.getRed + rightMatrix(0) * right.getRed)) & 0xFF) << 16
+        val green = ((math.round(leftMatrix(1) * left.getGreen + rightMatrix(1) * right.getGreen)) & 0xFF) << 8
+        val blue = ((math.round(leftMatrix(2) * left.getBlue + rightMatrix(2) * right.getBlue)) & 0xFF) << 0
 
-        kernelImage
+        red.toInt | green.toInt | blue.toInt
     }
 }

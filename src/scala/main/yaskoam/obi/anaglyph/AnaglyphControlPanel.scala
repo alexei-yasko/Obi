@@ -3,7 +3,7 @@ package yaskoam.obi.anaglyph
 import yaskoam.obi.image.ImageContainerPanel
 import swing.{FlowPanel, Button}
 import swing.event.ButtonClicked
-import yaskoam.obi.ImageDialog
+import yaskoam.obi.{ImageUtils, ImageDialog}
 
 /**
  * @author Q-YAA
@@ -25,7 +25,10 @@ class AnaglyphControlPanel(imageContainerPanel: ImageContainerPanel) extends Flo
             val leftImage = imageContainerPanel.getSelectedImagePanels.reverse.head.getImage
             val rightImage = imageContainerPanel.getSelectedImagePanels.head.getImage
 
-            val resultImageDialog = new ImageDialog(leftImage, this)
+            val anaglyphImage =
+                ImageUtils.getAnaglyphImage(leftImage, rightImage, ImageUtils.ANAGLYPH_RAD_GREEN_COLOR)
+
+            val resultImageDialog = new ImageDialog(anaglyphImage, this)
             resultImageDialog.open()
         }
     }
