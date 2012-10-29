@@ -14,7 +14,7 @@ public class FftTest {
     @Test
     public void testFft1D() {
         double[] array = {
-            146, 253, 100, 14, 93, 8, 0, 0
+            146, 253, 100, 14, 93, 8, 2, 3
         };
 
         double[] myResultArray = new Fft().fft1DDouble(array, array.length);
@@ -51,9 +51,9 @@ public class FftTest {
 
         double[][] resultMatrix = new double[matrix.length][matrix[0].length * 2];
         for (int i = 0; i < matrix.length; i++) {
-            System.arraycopy(matrix[i], 0, resultMatrix[i], 0, matrix.length);
+            System.arraycopy(matrix[i], 0, resultMatrix[i], 0, matrix[0].length);
         }
-        new DoubleFFT_2D(matrix[0].length, matrix.length).realForwardFull(resultMatrix);
+        new DoubleFFT_2D(matrix.length, matrix[0].length).realForwardFull(resultMatrix);
 
         System.out.println("My result: ");
         for (double[] aMyResultMatrix : myResultMatrix) {

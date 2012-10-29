@@ -190,8 +190,11 @@ class FourierControlPanel(imageContainerPanel: ImageContainerPanel) extends Flow
 
     private def reorder(inp: Array[Array[Double]], width: Int, height: Int) {
         val tmp = Array.ofDim[Double](height, width)
-        val w = (width / 2).toInt
-        val h = (height / 2).toInt
+        //        val w = (width / 2).toInt
+        //        val h = (height / 2).toInt
+
+        val w = (inp(0).length / 2).toInt
+        val h = (inp.length / 2).toInt
 
         for (i <- 0 until h) {
             for (j <- 0 until w) {
@@ -226,7 +229,6 @@ class FourierControlPanel(imageContainerPanel: ImageContainerPanel) extends Flow
                 inp(i)(j + w) = tmp(i)(j)
             }
         }
-
     }
 
     private def visualizeFftNew(channel: Array[Array[Double]], width: Int, height: Int): Array[Array[Int]] = {
@@ -251,16 +253,23 @@ class FourierControlPanel(imageContainerPanel: ImageContainerPanel) extends Flow
                 }
 
                 channel(i)(2 * j) = module
+                channel(i)(2 * j + 1) = module
             }
         }
 
-        for (i <- 0 until height) {
-            for (j <- 0 until width) {
+        val fromHeight = (channel.length - height) / 2
+        val toHeight = channel.length - (channel.length - height) / 2
+
+        val fromWidth = (channel(0).length - width) / 2
+        val toWidth = channel(0).length - (channel(0).length - width) / 2
+
+        for (i <- fromHeight until toHeight / 2) {
+            for (j <- fromWidth until toWidth / 2) {
                 val test: Double = (channel(i)(2 * j) - min) / (max - min)
-                resultChannel(i)(j) = (255 * test).toInt
-//                if (resultChannel(i)(j) > 255) {
-//                    resultChannel(i)(j) = 255
-//                }
+                resultChannel(i - fromHeight)(j - fromWidth) = (255 * test).toInt
+                //                if (resultChannel(i)(j) > 255) {
+                //                    resultChannel(i)(j) = 255
+                //                }
             }
         }
 
