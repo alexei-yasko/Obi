@@ -55,6 +55,8 @@ object FilterUtils {
     def boofCVInvertFilter(image: BufferedImage, maxColors: Int): BufferedImage =
         boofCVFilter(image, GrayImageOps.invert(_, maxColors, _))
 
+    def boofCVGaussianFilter(image: BufferedImage, sigma: Double, radius: Int): BufferedImage =
+        boofCVFilter(image, BlurImageOps.gaussian(_, _, sigma, radius, null))
 
     private def boofCVFilter(image: BufferedImage, filter: (ImageUInt8, ImageUInt8) => Unit): BufferedImage = {
         val originImage = ConvertBufferedImage.convertFromMulti(image, null, classOf[ImageUInt8])

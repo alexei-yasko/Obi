@@ -6,6 +6,7 @@ import furier.FourierControlPanel
 import giis.labs.graphics.custom.ToolBar
 import image.{ImageContainerPanel, ImagePanel}
 import normalization.NormalizationControlPanel
+import segmentation.SegmentationControlPanel
 import swing._
 import java.awt.Dimension
 
@@ -26,12 +27,14 @@ class ApplicationMainFrame extends MainFrame {
     private val filterControlPanel = new FilterControlPanel(imageContainerPanel)
     private val fourierControlPanel = new FourierControlPanel(imageContainerPanel)
     private val anaglyphControlPanel = new AnaglyphControlPanel(imageContainerPanel)
+    private val segmentationControlPanel = new SegmentationControlPanel(imageContainerPanel)
 
     private val toolBar = new ToolBar
     //toolBar.add(filterControlPanel)
     //toolBar.add(normalizationControlPanel)
     //toolBar.add(fourierControlPanel)
-    toolBar.add(anaglyphControlPanel)
+    //toolBar.add(anaglyphControlPanel)
+    toolBar.add(segmentationControlPanel)
 
     title = "Filters Application"
     size = new Dimension(defaultWidth, defaultHeight)

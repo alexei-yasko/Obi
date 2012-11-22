@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage
 import java.io.{IOException, File}
 import javax.imageio.ImageIO
 import java.awt.Color
+import boofcv.core.image.ConvertBufferedImage
+import boofcv.struct.image.ImageUInt8
 
 /**
  * @author Q-YAA
@@ -96,6 +98,11 @@ object ImageUtils {
         }
 
         anaglyphImage
+    }
+
+    def toBlackAndWhiteImage(sourceImage: BufferedImage): BufferedImage = {
+        val intermediateImage: ImageUInt8 = ConvertBufferedImage.convertFrom(sourceImage, null)
+        ConvertBufferedImage.convertTo(intermediateImage, null)
     }
 
     private def multyplayColor(left: RgbConverter, right: RgbConverter, anaglyphType: Int): Int = {
