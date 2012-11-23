@@ -8,9 +8,8 @@ import java.util
 /**
  * @author Q-YAA
  */
-class CunnyDetector(lowThreshold: Int, heightThreshold: Int) {
+class CunnyDetector(lowThreshold: Int, heightThreshold: Int, gaussianSigma: Double) {
 
-    private val GAUSSIAN_SIGMA = 1
     private val GAUSSIAN_RADIUS = 5
 
     private val STRONG_EDGE_PIXEL_VALUE = 255
@@ -20,7 +19,7 @@ class CunnyDetector(lowThreshold: Int, heightThreshold: Int) {
 
     def detect(sourceImage: BufferedImage): BufferedImage = {
         val bwSourceImage = ImageUtils.toBlackAndWhiteImage(sourceImage)
-        val filteredImage = FilterUtils.boofCVGaussianFilter(bwSourceImage, GAUSSIAN_SIGMA, GAUSSIAN_RADIUS)
+        val filteredImage = FilterUtils.boofCVGaussianFilter(bwSourceImage, gaussianSigma, GAUSSIAN_RADIUS)
 
         history = filteredImage :: history
 
@@ -47,16 +46,28 @@ class CunnyDetector(lowThreshold: Int, heightThreshold: Int) {
     def getHistory = history.reverse
 
     def calculateSobelGradients(image: BufferedImage): (Array[Array[Int]], Array[Array[Int]]) = {
+        //        val gxMatrix = new FilterMatrix(3, 3, Array[Float](
+        //            -1f, 0f, 1f,
+        //            -2f, 0f, 2f,
+        //            -1f, 0f, 1f)
+        //        )
+        //
+        //        val gyMatrix = new FilterMatrix(3, 3, Array[Float](
+        //            -1f, -2f, -1f,
+        //            0f, 0f, 0f,
+        //            1f, 2f, 1f)
+        //        )
+
         val gxMatrix = new FilterMatrix(3, 3, Array[Float](
-            -1f, 0f, 1f,
-            -2f, 0f, 2f,
-            -1f, 0f, 1f)
+            0f, -1f, 0f,
+            -1f, 4f, -1f,
+            0f, -1f, 0f)
         )
 
         val gyMatrix = new FilterMatrix(3, 3, Array[Float](
-            -1f, -2f, -1f,
-            0f, 0f, 0f,
-            1f, 2f, 1f)
+            -1f, -1f, -1f,
+            -1f, 8f, -1f,
+            -1f, -1f, -1f)
         )
 
         val gxImage = FilterUtils.filterImageWithMatrix(image, gxMatrix)
@@ -70,7 +81,7 @@ class CunnyDetector(lowThreshold: Int, heightThreshold: Int) {
 
         for (y <- 0 until gradientModule(0).size) {
             for (x <- 0 until gradientModule.size) {
-                gradientModule(x)(y) = math.sqrt(math.pow(xGradient(x)(y), 2) + math.pow(yGradient(x)(y), 2)).toInt
+                gradientModule(x)(y) = (math.sqrt(math.pow(xGradient(x)(y), 2) + math.pow(yGradient(x)(y), 2))).toInt
             }
         }
 
@@ -118,6 +129,11 @@ class CunnyDetector(lowThreshold: Int, heightThreshold: Int) {
                 }
                 else if (gradientDirection == 90 && (gradientModule(x)(y) < gradientModule(x - 1)(y)
                     || gradientModule(x)(y) < gradientModule(x + 1)(y))) {
+
+                    gradientModule(x)(y) = 0
+                }
+                else if (gradientDirection == 135 && (gradientModule(x)(y) < gradientModule(x - 1)(y - 1)
+                    || gradientModule(x)(y) < gradientModule(x + 1)(y + 1))) {
 
                     gradientModule(x)(y) = 0
                 }
@@ -197,6 +213,59 @@ class CunnyDetector(lowThreshold: Int, heightThreshold: Int) {
                     source(x)(y) = 0
                 }
             }
+        }
+    }
+
+    def segmentation(source: Array[Array[Int]]) {
+        val height = source(0).size - 1
+        val weight = source.size - 1
+
+        for (y <- 1 until weight) {
+
+            var state = false
+            var currentColor = 100
+
+            var intervals = List[(Int, Int)]()
+
+            for (x <- 1 until height) {
+
+                if (!state && source(y)(x) == STRONG_EDGE_PIXEL_VALUE && source(y + 1)(x) == 0) {
+                    state = true
+                    intervals = (y, x) :: intervals
+                }
+                else if (state && source(y)(x) == STRONG_EDGE_PIXEL_VALUE && source(y + 1)(x) == 0) {
+                    state = false
+                    intervals = (y, x) :: intervals
+                }
+            }
+
+            intervals = intervals.reverse
+
+            var previousPoint: (Int, Int) = null
+            for (point <- intervals) {
+
+                if (previousPoint != null) {
+
+                    for (x <- previousPoint._2 until point._2) {
+                        source(point._1)(x) = currentColor
+                    }
+
+                    currentColor = getNextColor(currentColor)
+                }
+
+                previousPoint = point
+            }
+        }
+    }
+
+    def getNextColor(color: Int): Int = {
+        val newColor = color + 25
+
+        if (newColor > 255) {
+            100
+        }
+        else {
+            newColor
         }
     }
 }

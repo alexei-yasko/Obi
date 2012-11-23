@@ -1,7 +1,7 @@
 package yaskoam.obi.segmentation
 
 import yaskoam.obi.image.ImageContainerPanel
-import swing.{Label, Slider, Button, FlowPanel}
+import swing._
 import swing.event.ButtonClicked
 import yaskoam.obi.ImageDialog
 
@@ -25,17 +25,21 @@ class SegmentationControlPanel(imageContainerPanel: ImageContainerPanel) extends
     private val heightThresholdSlider = new Slider {
         min = 0
         max = 255
-        value = 80
+        value = 40
 
         labels = Map(0 -> new Label("0"), 50 -> new Label("50"), 100 -> new Label("100"),
             150 -> new Label("150"), 200 -> new Label("200"), 255 -> new Label("255"))
         paintLabels = true
     }
 
+    private val gaussianSigmaTextEdit = new TextField("1.0")
+
     contents += cunnyDetectorButton
     contents += debugCunnyDetectorButton
     contents += lowThresholdSlider
     contents += heightThresholdSlider
+    contents += new Label("Sigma: ")
+    contents += gaussianSigmaTextEdit
 
     listenTo(cunnyDetectorButton, debugCunnyDetectorButton)
 
@@ -46,8 +50,8 @@ class SegmentationControlPanel(imageContainerPanel: ImageContainerPanel) extends
 
     private def applyCunnyDetection() {
         imageContainerPanel.getSelectedImagePanels.foreach(imagePanel => {
-            val resultImage =
-                new CunnyDetector(lowThresholdSlider.value + 1, heightThresholdSlider.value + 1).detect(imagePanel.getImage)
+            val resultImage = new CunnyDetector(lowThresholdSlider.value + 1, heightThresholdSlider.value + 1,
+                gaussianSigmaTextEdit.text.toDouble).detect(imagePanel.getImage)
 
             val imageDialog = new ImageDialog(resultImage, imageContainerPanel)
             imageDialog.open()
@@ -56,7 +60,8 @@ class SegmentationControlPanel(imageContainerPanel: ImageContainerPanel) extends
 
     private def debugCunnyDetection() {
         imageContainerPanel.getSelectedImagePanels.foreach(imagePanel => {
-            val cannyDetector = new CunnyDetector(lowThresholdSlider.value + 1, heightThresholdSlider.value + 1)
+            val cannyDetector = new CunnyDetector(
+                lowThresholdSlider.value + 1, heightThresholdSlider.value + 1, gaussianSigmaTextEdit.text.toDouble)
             cannyDetector.detect(imagePanel.getImage)
 
             for (image <- cannyDetector.getHistory) {
