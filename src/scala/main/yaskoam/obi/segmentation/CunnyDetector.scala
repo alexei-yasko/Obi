@@ -23,7 +23,7 @@ class CunnyDetector(lowThreshold: Int, heightThreshold: Int, gaussianSigma: Doub
 
         history = filteredImage :: history
 
-        val xyGradient = calculateSobelGradients(filteredImage)
+        val xyGradient = calculateGradients(filteredImage)
         val imageMatrix = calculateGradientModule(xyGradient._1, xyGradient._2)
 
         history = displayMatrix(imageMatrix) :: history
@@ -45,7 +45,7 @@ class CunnyDetector(lowThreshold: Int, heightThreshold: Int, gaussianSigma: Doub
 
     def getHistory = history.reverse
 
-    def calculateSobelGradients(image: BufferedImage): (Array[Array[Int]], Array[Array[Int]]) = {
+    private def calculateGradients(image: BufferedImage): (Array[Array[Int]], Array[Array[Int]]) = {
         //        val gxMatrix = new FilterMatrix(3, 3, Array[Float](
         //            -1f, 0f, 1f,
         //            -2f, 0f, 2f,
@@ -76,7 +76,7 @@ class CunnyDetector(lowThreshold: Int, heightThreshold: Int, gaussianSigma: Doub
         (ImageUtils.getSeparatedChannels(gxImage)._1, ImageUtils.getSeparatedChannels(gyImage)._1)
     }
 
-    def calculateGradientModule(xGradient: Array[Array[Int]], yGradient: Array[Array[Int]]): Array[Array[Int]] = {
+    private def calculateGradientModule(xGradient: Array[Array[Int]], yGradient: Array[Array[Int]]): Array[Array[Int]] = {
         val gradientModule = Array.ofDim[Int](xGradient.size, xGradient(0).size)
 
         for (y <- 0 until gradientModule(0).size) {
@@ -88,12 +88,12 @@ class CunnyDetector(lowThreshold: Int, heightThreshold: Int, gaussianSigma: Doub
         gradientModule
     }
 
-    def calculateGradientDirection(xPixel: Int, yPixel: Int): Int = {
+    private def calculateGradientDirection(xPixel: Int, yPixel: Int): Int = {
         val angle = math.atan(yPixel.toDouble / xPixel.toDouble) * 180 / math.Pi
         (math.round(angle / 45d) * 45).toInt
     }
 
-    def displayMatrix(gradientModule: Array[Array[Int]]): BufferedImage = {
+    private def displayMatrix(gradientModule: Array[Array[Int]]): BufferedImage = {
         for (y <- 0 until gradientModule(0).size) {
             for (x <- 0 until gradientModule.size) {
 
@@ -109,7 +109,7 @@ class CunnyDetector(lowThreshold: Int, heightThreshold: Int, gaussianSigma: Doub
         resultImage
     }
 
-    def nonMaximumSuppression(
+    private def nonMaximumSuppression(
         xGradient: Array[Array[Int]], yGradient: Array[Array[Int]], gradientModule: Array[Array[Int]]) {
 
         for (y <- 1 until gradientModule(0).size - 1) {
@@ -141,7 +141,7 @@ class CunnyDetector(lowThreshold: Int, heightThreshold: Int, gaussianSigma: Doub
         }
     }
 
-    def doubleThresholding(lowerBound: Int, upperBound: Int, gradientModule: Array[Array[Int]]) {
+    private def doubleThresholding(lowerBound: Int, upperBound: Int, gradientModule: Array[Array[Int]]) {
         for (y <- 1 until gradientModule(0).size - 1) {
             for (x <- 1 until gradientModule.size - 1) {
 
@@ -158,7 +158,7 @@ class CunnyDetector(lowThreshold: Int, heightThreshold: Int, gaussianSigma: Doub
         }
     }
 
-    def edgeTrackingByHysteresis(source: Array[Array[Int]]) {
+    private def edgeTrackingByHysteresis(source: Array[Array[Int]]) {
         val height = source(0).size - 1
         val weight = source.size - 1
 
@@ -216,7 +216,7 @@ class CunnyDetector(lowThreshold: Int, heightThreshold: Int, gaussianSigma: Doub
         }
     }
 
-    def segmentation(source: Array[Array[Int]]) {
+    private def segmentation(source: Array[Array[Int]]) {
         val height = source(0).size - 1
         val weight = source.size - 1
 
@@ -258,7 +258,7 @@ class CunnyDetector(lowThreshold: Int, heightThreshold: Int, gaussianSigma: Doub
         }
     }
 
-    def getNextColor(color: Int): Int = {
+    private def getNextColor(color: Int): Int = {
         val newColor = color + 25
 
         if (newColor > 255) {
