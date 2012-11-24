@@ -40,7 +40,11 @@ class CunnyDetector(lowThreshold: Int, heightThreshold: Int, gaussianSigma: Doub
 
         history = displayMatrix(imageMatrix) :: history
 
-        displayMatrix(imageMatrix)
+        applyToSourceImage(sourceImage, imageMatrix)
+
+        history = sourceImage :: history
+
+        sourceImage
     }
 
     def getHistory = history.reverse
@@ -214,6 +218,23 @@ class CunnyDetector(lowThreshold: Int, heightThreshold: Int, gaussianSigma: Doub
                 }
             }
         }
+    }
+
+    private def applyToSourceImage(sourceImage: BufferedImage, imageMatrix: Array[Array[Int]]) {
+        val channels = ImageUtils.getSeparatedChannels(sourceImage)
+
+        for (y <- 0 until channels._1(0).size) {
+            for (x <- 0 until channels._1.size) {
+
+                if (imageMatrix(x)(y) == STRONG_EDGE_PIXEL_VALUE) {
+                    channels._1(x)(y) = STRONG_EDGE_PIXEL_VALUE
+                    channels._2(x)(y) = STRONG_EDGE_PIXEL_VALUE
+                    channels._3(x)(y) = STRONG_EDGE_PIXEL_VALUE
+                }
+            }
+        }
+
+        ImageUtils.setChannelsToImage(sourceImage, channels)
     }
 
     private def segmentation(source: Array[Array[Int]]) {

@@ -36,8 +36,8 @@ class ApplicationMainFrame extends MainFrame {
     //toolBar.add(normalizationControlPanel)
     //toolBar.add(fourierControlPanel)
     //toolBar.add(anaglyphControlPanel)
-    //toolBar.add(segmentationControlPanel)
-    toolBar.add(recognitionControlPanel)
+    toolBar.add(segmentationControlPanel)
+    //toolBar.add(recognitionControlPanel)
 
     title = "Filters Application"
     size = new Dimension(defaultWidth, defaultHeight)
